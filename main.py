@@ -1,6 +1,7 @@
 #pygame setup
 import pygame
 pygame.init()
+import random
 
 # Define some constants for screen dimensions
 SCREEN_WIDTH = 1280
@@ -12,6 +13,9 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 # pygame.display.set_caption("Whea Za Weasel Game")
 test_font = pygame.font.Font(None, 100)
+
+#timer to keep track of radish randomly generating
+spawn_timer = pygame.time.get_ticks()
 
 garden_surface = pygame.image.load('radish_garden.jpg')
 text_surface = test_font.render('Whea Za Weasel Game',True, 'Red')
@@ -28,12 +32,14 @@ class Weasel(pygame.sprite.Sprite):
         self.image = weasel_img.convert_alpha()
         self.rect = self.image.get_rect(midbottom = ((0, SCREEN_HEIGHT - 100)))
         self.right_facing = True
+        self.speed_x = 4
+        self.speed_y = 20
 
     def move(self):
         if self.right_facing:
-            self.rect.x +=4
+            self.rect.x += self.speed_x
         else: 
-            self.rect.x -= 4
+            self.rect.x -= self.speed_x
         if self.rect.right > SCREEN_WIDTH: self.right_facing = False 
         if self.rect.left < 0: self.right_facing = True
 
@@ -42,46 +48,51 @@ class Radish(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = radish_img.convert_alpha()
-        self.rect = self.image.get_rect(midbottom = ((100, SCREEN_HEIGHT - 100)))
+        self.rect = self.image.get_rect(midbottom = ((900, SCREEN_HEIGHT - 100)))
 
-
+def generate_random_radish():
+    x = random.randint(0, SCREEN_WIDTH)
+    y = random.randint(0, SCREEN_HEIGHT)
+    return Radish(x, y)
 
 # Create sprite groups
 all_sprites = pygame.sprite.Group()
+radish_group = pygame.sprite.Group()
 
 # Add the weasel & ra sprite to the group
 weasel = Weasel()
 radish = Radish()
 all_sprites.add(weasel, radish)
-print(radish.rect.y)
-print(weasel.rect.y)
-print(radish.rect.midbottom[1])
-print(weasel.rect.midbottom[1])
-
-# # Add radishes to the group in a 10x10 grid
-# for i in range(GRID_SIZE):
-#     for j in range(GRID_SIZE):
-#         radish = Radish((i + 0.5) * RADISH_SIZE, SCREEN_HEIGHT - (j + 0.5) * RADISH_SIZE)
-#         all_sprites.add(radish)
+radish_group.add(radish)
 
 collision_detected = False #initialize collison flag
-# Print dimensions of the weasel's & radish's rect
-print("Weasel Rect Dimensions:", weasel.rect.width, "x", weasel.rect.height)
-print("Radish Rect Dimensions:", radish.rect.width, "x", radish.rect.height)
 
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                weasel.rect.y -= weasel.speed_y #Move up
+            elif event.key == pygame.K_DOWN:
+                weasel.rect.y += weasel.speed_y #Move down!! 
 
-    #Update
+    current_time = pygame.time.get_ticks()
+    if current_time - spawn_timer > 2000:
+        # Generate and add a new random radish
+        radish = generate_random_radish()
+        all_sprites.add(radish)
+        radish_group.add(radish)
+        spawn_timer = current_time  # Reset the timer
+
     all_sprites.update()
-
 # Check for collisions (trigger only once)
     if not collision_detected and weasel.rect.colliderect(radish.rect):
         print("Collision detected!")
         collision_detected = True  # Set the flag to True to avoid continuous collisions
+        radish.kill()
+    all_sprites.update()
 
     #Draw
     screen.blit(garden_surface, (0,0))
