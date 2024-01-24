@@ -1,35 +1,62 @@
 #pygame setup
 import pygame
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+
+# Define some constants for screen dimensions
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+# GRID_SIZE = 10
+# RADISH_SIZE = SCREEN_WIDTH // GRID_SIZE
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
-pygame.display.set_caption("Catch the Weasel Game")
-pygame.display.set_caption("Catch the Weasel Game")
+# pygame.display.set_caption("Whea Za Weasel Game")
 test_font = pygame.font.Font(None, 100)
 
 garden_surface = pygame.image.load('radish_garden.jpg')
-text_surface = test_font.render('where the weasel',True, 'Red')
+text_surface = test_font.render('Whea Za Weasel Game',True, 'Red')
 
-class Weasel():
-    surface = pygame.image.load('weasel_180.png').convert_alpha()
-    x_pos = 0
-    right_facing = True
-
+class Weasel(pygame.sprite.Sprite):
     def __init__(self, x_pos = 0):
-        self.x_pos = x_pos
-        self.surface = pygame.image.load('weasel_180.png').convert_alpha()
-        self.rect = self.surface.get_rect(midbottom = ((self.x_pos,0)))
+        super().__init__()
+        self.image = pygame.image.load('weasel_180.png').convert_alpha()
+        self.rect = self.image.get_rect(midbottom = ((x_pos, SCREEN_HEIGHT - 100)))
+        self.right_facing = True
 
     def move(self):
         if self.right_facing:
-            self.x_pos +=4
+            self.rect.x +=4
         else: 
-            self.x_pos -= 4
-        if self.x_pos > 1280: self.right_facing = False 
-        if self.x_pos < -100: self.right_facing = True
+            self.rect.x -= 4
+        if self.rect.right > SCREEN_WIDTH: self.right_facing = False 
+        if self.rect.left < 0: self.right_facing = True
+
+    # def check_collison_wit_radishes(self, radishes_groups)
 
 
+
+class Radish(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.image.load('radish_3.png').convert_alpha()
+        self.rect = self.image.get_rect(midbottom=(x, y))
+
+
+# Create sprite groups
+all_sprites = pygame.sprite.Group()
+
+# Add the weasel & ra sprite to the group
 weasel = Weasel()
+radish = Radish(300,1000)
+all_sprites.add(weasel, radish)
+print(radish.rect.y)
+print(weasel.rect.y)
+
+# # Add radishes to the group in a 10x10 grid
+# for i in range(GRID_SIZE):
+#     for j in range(GRID_SIZE):
+#         radish = Radish((i + 0.5) * RADISH_SIZE, SCREEN_HEIGHT - (j + 0.5) * RADISH_SIZE)
+#         all_sprites.add(radish)
 
 running = True
 while running:
@@ -37,11 +64,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    #Update
+    all_sprites.update()
+
+    #Draw
     screen.blit(garden_surface, (0,0))
-    screen.blit(text_surface, (600,300))
-    screen.blit(weasel.surface, (weasel.x_pos, 300))
+    screen.blit(text_surface, (200,300))
     weasel.move()
-    print(weasel.rect.topleft)
+    all_sprites.draw(screen)
 
     # Update game logic here
 
