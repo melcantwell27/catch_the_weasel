@@ -17,6 +17,9 @@ weasel_img = pygame.transform.scale(weasel_OG_img, default_img_size)
 radish_OG_img = pygame.image.load('radish_dish.png')
 radish_img = pygame.transform.scale(radish_OG_img, default_img_size)
 
+# # Define fonts
+# font = pygame.font.Font(None, 12)
+
 
 class Weasel(pygame.sprite.Sprite):
     def __init__(self):
@@ -40,7 +43,7 @@ class Radish(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = radish_img.convert_alpha()
-        radish_position = (random.randint(150, SCREEN_WIDTH), random.randint(150, SCREEN_HEIGHT))
+        radish_position = (random.randint(150, SCREEN_WIDTH), random.randint(250, SCREEN_HEIGHT))
         self.rect = self.image.get_rect(midbottom = radish_position)
 
 # Create sprite groups
@@ -55,6 +58,10 @@ radish_group.add(radish)
 
 collision_detected = False #initialize collison flag
 radish_count = 0 #initalize radish count
+font = pygame.font.Font(None, 36)
+
+# def score(radish_count):
+#     font.render_to(world, (4, 4), "Score:"+str(score), BLACK, None, size=64)
 
 running = True
 while running:
@@ -73,6 +80,7 @@ while running:
         collision_detected = True  # Set the flag to True to avoid continuous collisions 
         radish_count += 1
         print(radish_count)
+         # Update radish_count text
         radish.kill()
         radish_group.empty()
         radish = Radish()
@@ -85,6 +93,10 @@ while running:
     screen.blit(garden_surface, (0,0))
     weasel.move()
     all_sprites.draw(screen)
+
+
+    radish_count_text = font.render(f'Radish Count: {radish_count}', True, (0, 0, 0))
+    screen.blit(radish_count_text, (1075, 40))  
     # print(all_sprites)
 
     # Update game logic here
