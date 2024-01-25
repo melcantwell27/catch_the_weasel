@@ -7,6 +7,13 @@ import random
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
+#timer
+start_time = pygame.time.get_ticks()
+game_duration_seconds = 27
+initial_timer_seconds = game_duration_seconds
+end_time = start_time + game_duration_seconds * 1000  # convert seconds to milliseconds
+
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
@@ -16,9 +23,7 @@ weasel_OG_img = pygame.image.load('weasel_180.png')
 weasel_img = pygame.transform.scale(weasel_OG_img, default_img_size)
 radish_OG_img = pygame.image.load('radish_dish.png')
 radish_img = pygame.transform.scale(radish_OG_img, default_img_size)
-
-# # Define fonts
-# font = pygame.font.Font(None, 12)
+radish_count = 0 #initalize radish count
 
 
 class Weasel(pygame.sprite.Sprite):
@@ -27,8 +32,8 @@ class Weasel(pygame.sprite.Sprite):
         self.image = weasel_img.convert_alpha()
         self.rect = self.image.get_rect(midbottom = ((0, SCREEN_HEIGHT - 100)))
         self.right_facing = True
-        self.speed_x = 4
-        self.speed_y = 20
+        self.speed_x = 8 + (radish_count^3)
+        self.speed_y = 30 + 30*radish_count^2
 
     def move(self):
         if self.right_facing:
@@ -57,11 +62,9 @@ all_sprites.add(weasel, radish)
 radish_group.add(radish)
 
 collision_detected = False #initialize collison flag
-radish_count = 0 #initalize radish count
 font = pygame.font.Font(None, 36)
+warning_font = pygame.font.Font(None, 100)
 
-# def score(radish_count):
-#     font.render_to(world, (4, 4), "Score:"+str(score), BLACK, None, size=64)
 
 running = True
 while running:
@@ -87,24 +90,31 @@ while running:
         radish_group.add(radish)
         all_sprites.add(radish)
 
-    # all_sprites.update()
+        # Check game duration
+    current_time = pygame.time.get_ticks()
+    elapsed_time_seconds = (current_time - start_time) / 1000  # convert milliseconds to seconds
 
     #Draw
     screen.blit(garden_surface, (0,0))
+    if game_duration_seconds - elapsed_time_seconds <= 4:
+            # Render the text surface
+        warning_text = warning_font.render("Time's running out!", True, (255, 0, 0))  # red color
+        screen.blit(warning_text, (290, 350))
+        radish_count_text = font.render(f'Radish Count: {radish_count}', True, (0, 0, 255))
+        screen.blit(radish_count_text, (490, 450))
+
+    if elapsed_time_seconds >= game_duration_seconds:
+        running = False
     weasel.move()
     all_sprites.draw(screen)
 
 
     radish_count_text = font.render(f'Radish Count: {radish_count}', True, (0, 0, 0))
     screen.blit(radish_count_text, (1075, 40))  
-    # print(all_sprites)
-
-    # Update game logic here
-
-    # Draw game elements here
+   
 
     pygame.display.flip()
     clock.tick(60) # limits FPS to 60
 
-pygame.quit()
+# pygame.quit()
 
