@@ -2,6 +2,9 @@
 
 Whea Za Weasel is a Python game developed using the Pygame framework where the player controls a weasel collecting radishes in a timed garden environment.
 
+![WHEA ZA WEASEL](https://github.com/melcantwell27/catch_the_weasel/raw/main/WHEA%20ZA%20WEASEL.png)
+
+
 ## Features:
 
 - **Dynamic Gameplay**: Control a weasel to collect radishes in a garden setting. Use the arrow keys to move the weasel up and down to avoid obstacles and gather radishes.
